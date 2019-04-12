@@ -1,0 +1,44 @@
+#for cetntos5
+#echo 6553600 >/proc/sys/net/ipv4/netfilter/ip_conntrack_max
+#for centos 6
+echo 6553600 > /proc/sys/net/netfilter/nf_conntrack_max
+echo 600 > /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established 
+
+echo 1073741824 >  /proc/sys/net/ipv4/route/max_size
+
+echo 10737418240 >/proc/sys/kernel/shmall
+echo 10737418240 >/proc/sys/kernel/shmmax
+
+echo 120 >/proc/sys/net/ipv4/neigh/default/gc_stale_time
+echo 10240 >/proc/sys/net/ipv4/neigh/default/gc_thresh1
+echo 40960 >/proc/sys/net/ipv4/neigh/default/gc_thresh2
+echo 81920 >/proc/sys/net/ipv4/neigh/default/gc_thresh3
+
+
+ /sbin/modprobe ip_tables
+ /sbin/modprobe ip_nat_ftp
+ /sbin/modprobe ip_conntrack_ftp
+ /sbin/iptables -F
+ /sbin/iptables -F -t nat
+ /sbin/iptables -X
+ /sbin/iptables -X -t nat
+ /sbin/iptables -Z
+ /sbin/iptables -P INPUT ACCEPT
+ /sbin/iptables -P FORWARD ACCEPT
+ /sbin/iptables -P OUTPUT ACCEPT
+
+ echo 1 > /proc/sys/net/ipv4/ip_forward
+#permit to cmnet
+/sbin/iptables -t nat -A POSTROUTING -d 8.8.8.8/32 -s 192.168.222.0/24 -j SNAT --to-source 192.168.244.185
+/sbin/iptables -t nat -A POSTROUTING -d 120.198.253.125/32 -s 192.168.222.0/24 -j SNAT --to-source 192.168.244.185
+# 智能质检Nginx主动出访策略
+/sbin/iptables -t nat -A POSTROUTING -d 172.16.190.0/24 -s 192.168.222.0/24 -j SNAT --to-source 192.168.244.185
+# 智能社区Nginx主动出访问短信网关策略
+/sbin/iptables -t nat -A POSTROUTING -d 47.98.19.118/32 -s 192.168.222.0/24 -j SNAT --to-source 192.168.244.185
+
+# 智能社区Nginx主动出访问短信网关策略
+/sbin/iptables -t nat -A POSTROUTING -d 112.13.168.6/32 -s 192.168.222.0/24 -j SNAT --to-source 192.168.244.185
+
+
+##222网段所有主机可以上公网
+/sbin/iptables -t nat -A POSTROUTING  --out-interface eth1 -s 192.168.222.0/24   -j SNAT   --to-source 192.168.244.185
